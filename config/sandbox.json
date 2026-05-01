@@ -1,0 +1,12 @@
+{
+  "allow_shell": false,
+  "allow_network": false,
+  "allow_filesystem_write": true,
+  "allow_filesystem_read": true,
+  "restricted_paths": [
+    "C:/Windows",
+    "C:/Program Files",
+    "C:/Users/*/AppData"
+  ],
+  "require_tool_registry_validation": true
+}

@@ -1,0 +1,179 @@
+from pathlib import Path
+
+from core.ai_router import AIRouter
+from core.hybrid_registry import HybridRegistry, PROJECT_ROOT
+from core.memory_compressor import MemoryCompressor
+from core.session_state import SessionStateStore
+
+
+CONFIG_PATH = PROJECT_ROOT / "config" / "config.json"
+
+MEMORY_DIR = PROJECT_ROOT / "memory"
+LOGS_DIR = PROJECT_ROOT / "logs"
+INDEX_DIR = PROJECT_ROOT / "memory"
+INDEX_FILE = INDEX_DIR / "index.json"
+SESSION_STATE_FILE = PROJECT_ROOT / "runtime" / "session_state.json"
+
+
+class ToolExecutor:
+    def __init__(self, registry: HybridRegistry):
+        self.registry = registry
+
+    def execute(self, tool_name: str, **kwargs):
+        result = self.registry.execute_tool(tool_name, **kwargs)
+        return {"status": "ok", "tool": tool_name, "result": result}
+
+
+def main() -> None:
+    print("LLM Chat + Tool Router (type 'exit' or 'quit' to stop)")
+
+    session_store = SessionStateStore(SESSION_STATE_FILE)
+    previous_state = session_store.load()
+
+    if previous_state.get("status") in {"running", "interrupted", "crashed", "corrupt"}:
+        print(
+            f"Recovery -> Previous session ended unexpectedly "
+            f"(status={previous_state.get('status')})."
+        )
+        pending = previous_state.get("pending_action")
+        if pending:
+            print(f"Recovery -> Interrupted pending action: {pending}")
+        reason = previous_state.get("last_shutdown_reason")
+        if reason:
+            print(f"Recovery -> Last shutdown reason: {reason}")
+
+    extra_skill_dirs = []
+    external_skills_dir = PROJECT_ROOT / "external_skills"
+    if external_skills_dir.exists() and external_skills_dir.is_dir():
+        extra_skill_dirs.append(external_skills_dir)
+
+    registry = HybridRegistry(
+        extra_skill_dirs=extra_skill_dirs,
+    )
+    registry.refresh()
+
+    print(f"Discovered skills: {registry.list_skill_names()}")
+    print(f"Registered tools: {registry.list_tool_names()}")
+
+    compressor = MemoryCompressor(
+        memory_dir=MEMORY_DIR,
+        logs_dir=LOGS_DIR,
+        index_path=INDEX_FILE,
+        interval_turns=100,
+    )
+
+    router = AIRouter(registry=registry, config_path=CONFIG_PATH)
+    executor = ToolExecutor(registry)
+
+    pending_action = None
+    pending_risky_confirm = False
+    mode = "auto"
+
+    session_store.mark_running()
+
+    try:
+        while True:
+            user_input = input(">> ").strip()
+            if user_input.lower() in {"exit", "quit"}:
+                session_store.mark_clean_exit()
+                break
+
+            lowered = user_input.lower()
+
+            if lowered == "confirm risky write":
+                if pending_risky_confirm:
+                    print("Executing risky write (double-confirmed).")
+                    if pending_action:
+                        result = executor.execute(
+                            pending_action["tool"],
+                            **pending_action["args"],
+                        )
+                        print(f"Executor -> {result}")
+                        pending_action = None
+                        session_store.set_pending_action(None)
+                    pending_risky_confirm = False
+                    continue
+                else:
+                    print("No pending risky write to confirm.")
+                    continue
+
+            if lowered == "approve":
+                if pending_action is None:
+                    print("No pending action to approve.")
+                    continue
+
+                tool_name = pending_action["tool"]
+                tool_info = registry.get_tool(tool_name)
+                risk = tool_info.spec.risk if tool_info else "safe"
+
+                if risk == "elevated":
+                    print("Gateway -> CONFIRM: Elevated tool in user mode")
+                    print("This action may write outside the project.")
+                    print("To confirm risky write, type: Confirm Risky Write")
+                    pending_risky_confirm = True
+                    continue
+
+                print("Gateway -> SAFE: Allowed")
+                result = executor.execute(tool_name, **pending_action["args"])
+                print(f"Executor -> {result}")
+                pending_action = None
+                session_store.set_pending_action(None)
+                continue
+
+            if lowered == "deny":
+                if pending_action is None:
+                    print("No pending action to deny.")
+                    continue
+                print("Pending action denied.")
+                pending_action = None
+                pending_risky_confirm = False
+                session_store.set_pending_action(None)
+                continue
+
+            parsed = router.parse_intent(user_input, mode=mode)
+            print(f"DEBUG result type: {type(parsed)}")
+            print(f"DEBUG result: {parsed}")
+
+            if parsed.get("mode") == "tool" and parsed.get("tool"):
+                tool_name = parsed["tool"]
+                print(f"Router -> tool: {tool_name}")
+
+                tool_info = registry.get_tool(tool_name)
+                if tool_info is None:
+                    print(f"Gateway -> BLOCKED: Unknown unregistered tool '{tool_name}'")
+                    continue
+
+                risk = tool_info.spec.risk
+
+                if risk == "elevated":
+                    print("Gateway -> CONFIRM: Elevated tool in user mode")
+                    print("Action requires explicit approval.")
+                    pending_action = {
+                        "tool": tool_name,
+                        "args": parsed.get("args", {}),
+                    }
+                    session_store.set_pending_action(pending_action)
+                    continue
+
+                print("Gateway -> SAFE: Allowed")
+                result = executor.execute(tool_name, **parsed.get("args", {}))
+                print(f"Executor -> {result}")
+                compressor.record_turn()
+                continue
+
+            print("Router -> chat:")
+            raw = (parsed.get("raw_response") or "").strip()
+            print(f"Chat -> {raw if raw else '[no response]'}")
+            compressor.record_turn()
+
+    except KeyboardInterrupt:
+        session_store.mark_interrupted()
+        print("\nRecovery -> Session interrupted. Restart recommended.")
+    except Exception as e:
+        session_store.mark_crash(str(e))
+        print(f"\nRecovery -> Session crashed: {e}")
+        raise
+
+
+if __name__ == "__main__":
+    main()

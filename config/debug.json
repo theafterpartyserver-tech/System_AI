@@ -1,0 +1,6 @@
+{
+  "debug_mode": true,
+  "trace_llm": true,
+  "trace_gateway": true,
+  "trace_executor": true
+}

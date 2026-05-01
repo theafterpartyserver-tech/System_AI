@@ -1,0 +1,25 @@
+{
+  "_comment": "permissions.json — RBAC rules, tool tier assignments, and admin escalation config",
+
+  "admin_passphrase": "CHANGE_THIS_BEFORE_USE",
+
+  "tool_tiers": {
+    "file_read": "safe",
+    "file_write": "elevated",
+    "shell_exec": "dangerous"
+  },
+
+  "blocked_tools": [],
+
+  "user_mode": {
+    "safe_tools_auto_execute": true,
+    "elevated_requires_approval": true,
+    "dangerous_requires_approval": true
+  },
+
+  "admin_mode": {
+    "safe_tools_auto_execute": true,
+    "elevated_auto_execute": true,
+    "dangerous_requires_approval": true
+  }
+}

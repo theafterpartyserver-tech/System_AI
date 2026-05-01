@@ -1,0 +1,73 @@
+[build-system]
+requires = ["setuptools>=68.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "system_ai"
+version = "0.1.0"
+description = "Local CLI AI shell with tool-driven routing, permissions, health checks, and memory."
+readme = "README.md"
+license = "MIT"
+requires-python = ">=3.11"
+authors = [
+  { name = "Menace2Tech", email = "menace2tech@outlook.com" },
+]
+keywords = ["ai", "local-llm", "agent", "cli", "tooling"]
+classifiers = [
+  "Development Status :: 4 - Beta",
+  "Intended Audience :: Developers",
+  "Programming Language :: Python :: 3",
+  "Programming Language :: Python :: 3.11",
+  "Programming Language :: Python :: 3.12",
+  "Topic :: Scientific/Engineering :: Artificial Intelligence",
+]
+
+dependencies = [
+  "llama-cpp-python>=0.3.4",
+  "numpy>=2.0.0",
+  "pydantic>=2.0.0",
+  "rich>=13.0.0",
+  "click>=8.0.0",
+  "jinja2>=3.0.0",
+  "diskcache>=5.0.0",
+  "requests>=2.31.0",
+  "urllib3>=2.0.0",
+  "python-dotenv>=1.0.0",
+]
+
+[project.optional-dependencies]
+dev = [
+  "pytest>=7.0.0",
+  "pytest-cov>=4.0.0",
+  "black>=23.0.0",
+  "ruff>=0.1.0",
+  "mypy>=1.0.0",
+  "build>=1.0.0",
+  "twine>=4.0.0",
+]
+
+[project.scripts]
+system_ai = "core.main:main"
+system_ai_setup = "core.setup_wizard:main"
+
+[project.urls]
+Repository = "https://github.com/Menace2Tech/system_ai"
+
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["core*", "skills*", "tools*"]
+
+[tool.setuptools.package-data]
+"*" = ["*.json", "*.md"]
+
+[tool.black]
+line-length = 100
+target-version = ["py311"]
+
+[tool.ruff]
+target-version = "py311"
+line-length = 100
+
+[tool.mypy]
+python_version = "3.11"
+warn_return_any = true

@@ -1,0 +1,18 @@
+{
+  "file_read": {
+    "inputs": ["path"],
+    "permission": "SAFE"
+  },
+  "file_write": {
+    "inputs": ["path", "content"],
+    "permission": "CONFIRM"
+  },
+  "shell_exec": {
+    "inputs": ["command"],
+    "permission": "HIGH_RISK"
+  },
+  "fallback_noop": {
+    "inputs": [],
+    "permission": "SAFE"
+  }
+}

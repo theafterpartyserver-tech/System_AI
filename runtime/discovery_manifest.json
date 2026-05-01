@@ -1,0 +1,64 @@
+{
+  "version": "2.0.0",
+  "generated": "2026-05-01T04:52:55.584846",
+  "project_root": ".",
+  "discovery": {
+    "tools": [
+      {
+        "name": "codegen_tools",
+        "type": "tool",
+        "file": "tools\\codegen_tools.py",
+        "docstring": "No description",
+        "functions": [
+          "add_two_numbers",
+          "hello_world",
+          "generated_function"
+        ],
+        "classes": [],
+        "source_type": "python"
+      },
+      {
+        "name": "file_tools",
+        "type": "tool",
+        "file": "tools\\file_tools.py",
+        "docstring": "No description",
+        "functions": [],
+        "classes": [],
+        "source_type": "python"
+      },
+      {
+        "name": "linter_tools",
+        "type": "tool",
+        "file": "tools\\linter_tools.py",
+        "docstring": "No description",
+        "functions": [],
+        "classes": [],
+        "source_type": "python"
+      },
+      {
+        "name": "shell_tools",
+        "type": "tool",
+        "file": "tools\\shell_tools.py",
+        "docstring": "No description",
+        "functions": [],
+        "classes": [],
+        "source_type": "python"
+      },
+      {
+        "name": "system_tools",
+        "type": "tool",
+        "file": "tools\\system_tools.py",
+        "docstring": "No description",
+        "functions": [],
+        "classes": [],
+        "source_type": "python"
+      }
+    ],
+    "skills": [],
+    "programs": [],
+    "metadata": {
+      "discovered_at": "2026-05-01T04:52:54.261684",
+      "total_discovered": 0
+    }
+  }
+}

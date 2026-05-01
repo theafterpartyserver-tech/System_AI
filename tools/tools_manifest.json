@@ -1,0 +1,73 @@
+{
+  "tools": [
+    {
+      "name": "file_read",
+      "description": "Read the contents of a file.",
+      "module": "tools.file_tools",
+      "function": "file_read",
+      "risk": "safe",
+      "enabled": true,
+      "args_schema": {
+        "path": "string"
+      }
+    },
+    {
+      "name": "file_write",
+      "description": "Write content to a file.",
+      "module": "tools.file_tools",
+      "function": "file_write",
+      "risk": "elevated",
+      "enabled": true,
+      "args_schema": {
+        "path": "string",
+        "content": "string"
+      }
+    },
+    {
+      "name": "shell_exec",
+      "description": "Run a shell command in a controlled subprocess.",
+      "module": "tools.shell_tools",
+      "function": "shell_exec",
+      "risk": "dangerous",
+      "enabled": true,
+      "args_schema": {
+        "command": "string",
+        "cwd": "string"
+      }
+    },
+    {
+      "name": "lint_code",
+      "description": "Lint Python code and report basic issues.",
+      "module": "tools.linter_tools",
+      "function": "lint_code",
+      "risk": "safe",
+      "enabled": true,
+      "args_schema": {
+        "code": "string"
+      }
+    },
+    {
+      "name": "codegen",
+      "description": "Generate Python code and run linting.",
+      "module": "tools.codegen_tools",
+      "function": "codegen",
+      "risk": "safe",
+      "enabled": true,
+      "args_schema": {
+        "prompt": "string",
+        "skill_name": "string"
+      }
+    },
+    {
+      "name": "list_dir",
+      "description": "List the contents of a directory.",
+      "module": "tools.list_dir",
+      "function": "list_dir",
+      "risk": "safe",
+      "enabled": true,
+      "args_schema": {
+        "path": "string"
+      }
+    }
+  ]
+}
