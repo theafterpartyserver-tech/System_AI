@@ -1,4 +1,4 @@
-﻿from __future__ import annotations
+from __future__ import annotations
 
 import os
 from pathlib import Path
@@ -104,7 +104,8 @@ class HybridRegistry:
     def _load_tools(self) -> None:
         """Load tools from manifest file dynamically."""
         try:
-            if not self._tools.keys():  # Only load if not already loaded
+            # FIX: Changed from 'if not self._tools.keys():' to 'if not self._tools:'
+            if not self._tools:  # Only load if not already loaded
                 loader = ToolLoader(self.tools_manifest_path)
                 registered_tools = loader.load()
                 
