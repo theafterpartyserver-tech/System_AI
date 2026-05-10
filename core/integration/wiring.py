@@ -1,4 +1,4 @@
-﻿from __future__ import annotations
+from __future__ import annotations
 
 from typing import Any, Dict, Optional
 import json
@@ -22,10 +22,13 @@ class IntegratedRouter:
     
     def __init__(self, context: AppContext) -> None:
         self.context = context
-        self.router = AIRouter(context.registry, Path("config") / "config.json")
+        # FIX: Use absolute path relative to project root
+        PROJECT_ROOT = Path(__file__).parent.parent.parent.resolve()
+        config_path = PROJECT_ROOT / "config" / "config.json"
+        self.router = AIRouter(context.registry, config_path)
         
         # Initialize gateway from permissions config
-        permissions_path = Path("config") / "permissions.json"
+        permissions_path = PROJECT_ROOT / "config" / "permissions.json"
         self.gateway = Gateway(permissions_path) if permissions_path.exists() else None
 
     def parse_intent(self, user_input: str, mode: str = "auto") -> Dict[str, Any]:
