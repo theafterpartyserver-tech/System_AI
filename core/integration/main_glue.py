@@ -1,4 +1,4 @@
-﻿from __future__ import annotations
+from __future__ import annotations
 
 from pathlib import Path
 from typing import Any, Dict, Optional
@@ -68,7 +68,7 @@ def setup_context(
     context.registry = registry
 
     # Run startup checks
-    print("\\n[STARTUP] Running health checks...")
+    print("\n[STARTUP] Running health checks...")
     health_ok = context.ensure_health(require_healthy=False)
     
     print("[STARTUP] Checking memory system...")
@@ -82,18 +82,14 @@ def setup_context(
     context.test_ok = test_ok
 
     # Report startup status
-    print("\\n[STARTUP] System initialization report:")
+    print("\n[STARTUP] System initialization report:")
     print(f"  Health checks: {'✓ PASS' if health_ok else '✗ FAIL'}")
     print(f"  Memory system: {'✓ PASS' if memory_ok else '✗ FAIL'}")
     print(f"  Regression suite: {'✓ PASS' if test_ok else '✗ FAIL'}")
     
     if health_ok and memory_ok and test_ok:
-        print("\\n[STARTUP] ✓ All systems operational. Ready for interaction.")
+        print("\n[STARTUP] ✓ All systems operational. Ready for interaction.")
     else:
-        print("\\n[STARTUP] ⚠ Warning: Some systems degraded. Proceeding with caution.")
+        print("\n[STARTUP] ⚠ Warning: Some systems degraded. Proceeding with caution.")
 
     return context
-
-
-
-
